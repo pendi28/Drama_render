@@ -1,0 +1,15 @@
+node_modules
+**/node_modules
+**/dist
+**/.cache
+**/.turbo
+.git
+.local
+.cache
+.replit
+.replitignore
+*.log
+attached_assets
+space_home.html
+internal_app.html
+app.py_content

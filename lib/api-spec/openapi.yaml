@@ -1,0 +1,525 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: DramaShort API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: user
+    description: User profile and coins
+  - name: dramas
+    description: Drama catalog and discovery
+  - name: episodes
+    description: Episodes and unlocks
+  - name: library
+    description: Favorites, continue watching, progress
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /me:
+    get:
+      operationId: getMe
+      tags: [user]
+      summary: Get current user profile
+      responses:
+        "200":
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+
+  /coins/purchase:
+    post:
+      operationId: purchaseCoins
+      tags: [user]
+      summary: Purchase a coin pack (mock)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                packId:
+                  type: string
+              required: [packId]
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+
+  /coins/packs:
+    get:
+      operationId: listCoinPacks
+      tags: [user]
+      summary: List available coin packs
+      responses:
+        "200":
+          description: List of coin packs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CoinPack"
+
+  /dramas:
+    get:
+      operationId: listDramas
+      tags: [dramas]
+      summary: List dramas with optional filters
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+        - in: query
+          name: genre
+          schema:
+            type: string
+        - in: query
+          name: sort
+          schema:
+            type: string
+            enum: [popular, newest, trending]
+      responses:
+        "200":
+          description: List of dramas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Drama"
+
+  /dramas/featured:
+    get:
+      operationId: listFeaturedDramas
+      tags: [dramas]
+      summary: Featured hero dramas
+      responses:
+        "200":
+          description: Featured dramas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Drama"
+
+  /dramas/trending:
+    get:
+      operationId: listTrendingDramas
+      tags: [dramas]
+      summary: Top trending dramas (chart)
+      responses:
+        "200":
+          description: Trending dramas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Drama"
+
+  /dramas/recommended:
+    get:
+      operationId: listRecommendedDramas
+      tags: [dramas]
+      summary: Personalized "For You" recommendations
+      responses:
+        "200":
+          description: Recommended dramas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Drama"
+
+  /dramas/genres:
+    get:
+      operationId: listGenres
+      tags: [dramas]
+      summary: List of all genres with drama counts
+      responses:
+        "200":
+          description: Genres
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Genre"
+
+  /dramas/{id}:
+    get:
+      operationId: getDrama
+      tags: [dramas]
+      summary: Get a drama with its episodes
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Drama detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DramaDetail"
+
+  /episodes/{id}:
+    get:
+      operationId: getEpisode
+      tags: [episodes]
+      summary: Get an episode (with neighbor episode IDs)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Episode detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EpisodePlayback"
+
+  /episodes/{id}/unlock:
+    post:
+      operationId: unlockEpisode
+      tags: [episodes]
+      summary: Unlock an episode by spending coins
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Updated episode + new coin balance
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnlockResult"
+
+  /library/favorites:
+    get:
+      operationId: listFavorites
+      tags: [library]
+      summary: Get the user's favorite dramas
+      responses:
+        "200":
+          description: Favorites
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Drama"
+    post:
+      operationId: addFavorite
+      tags: [library]
+      summary: Add a drama to favorites
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                dramaId:
+                  type: string
+              required: [dramaId]
+      responses:
+        "200":
+          description: Updated favorites
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Drama"
+
+  /library/favorites/{dramaId}:
+    delete:
+      operationId: removeFavorite
+      tags: [library]
+      summary: Remove a drama from favorites
+      parameters:
+        - in: path
+          name: dramaId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Updated favorites
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Drama"
+
+  /library/continue-watching:
+    get:
+      operationId: listContinueWatching
+      tags: [library]
+      summary: Continue watching list with progress
+      responses:
+        "200":
+          description: Continue watching items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ContinueWatchingItem"
+
+  /library/progress:
+    post:
+      operationId: saveProgress
+      tags: [library]
+      summary: Save the user's playback progress for an episode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                episodeId:
+                  type: string
+                progressSeconds:
+                  type: integer
+              required: [episodeId, progressSeconds]
+      responses:
+        "200":
+          description: Saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContinueWatchingItem"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required: [status]
+
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: string
+        displayName:
+          type: string
+        avatarUrl:
+          type: string
+        coins:
+          type: integer
+        favoritesCount:
+          type: integer
+        watchedCount:
+          type: integer
+        memberSince:
+          type: string
+      required:
+        - id
+        - displayName
+        - avatarUrl
+        - coins
+        - favoritesCount
+        - watchedCount
+        - memberSince
+
+    CoinPack:
+      type: object
+      properties:
+        id:
+          type: string
+        coins:
+          type: integer
+        priceUsd:
+          type: number
+        bonus:
+          type: integer
+        label:
+          type: string
+      required: [id, coins, priceUsd, bonus, label]
+
+    Drama:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        genre:
+          type: array
+          items:
+            type: string
+        releaseYear:
+          type: integer
+        coverUrl:
+          type: string
+        bannerUrl:
+          type: string
+        rating:
+          type: number
+        viewsCount:
+          type: integer
+        episodesCount:
+          type: integer
+        durationLabel:
+          type: string
+        isNew:
+          type: boolean
+        isHot:
+          type: boolean
+      required:
+        - id
+        - title
+        - description
+        - category
+        - genre
+        - releaseYear
+        - coverUrl
+        - bannerUrl
+        - rating
+        - viewsCount
+        - episodesCount
+        - durationLabel
+        - isNew
+        - isHot
+
+    Episode:
+      type: object
+      properties:
+        id:
+          type: string
+        dramaId:
+          type: string
+        episodeNumber:
+          type: integer
+        title:
+          type: string
+        durationSeconds:
+          type: integer
+        thumbnailUrl:
+          type: string
+        videoUrl:
+          type: string
+        isLocked:
+          type: boolean
+        unlockCost:
+          type: integer
+      required:
+        - id
+        - dramaId
+        - episodeNumber
+        - title
+        - durationSeconds
+        - thumbnailUrl
+        - videoUrl
+        - isLocked
+        - unlockCost
+
+    DramaDetail:
+      allOf:
+        - $ref: "#/components/schemas/Drama"
+        - type: object
+          properties:
+            episodes:
+              type: array
+              items:
+                $ref: "#/components/schemas/Episode"
+            isFavorite:
+              type: boolean
+          required: [episodes, isFavorite]
+
+    EpisodePlayback:
+      type: object
+      properties:
+        episode:
+          $ref: "#/components/schemas/Episode"
+        drama:
+          $ref: "#/components/schemas/Drama"
+        prevEpisodeId:
+          type: string
+          nullable: true
+        nextEpisodeId:
+          type: string
+          nullable: true
+        progressSeconds:
+          type: integer
+      required: [episode, drama, progressSeconds]
+
+    UnlockResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+        episode:
+          $ref: "#/components/schemas/Episode"
+        coinsRemaining:
+          type: integer
+      required: [success, episode, coinsRemaining]
+
+    Genre:
+      type: object
+      properties:
+        name:
+          type: string
+        count:
+          type: integer
+      required: [name, count]
+
+    ContinueWatchingItem:
+      type: object
+      properties:
+        drama:
+          $ref: "#/components/schemas/Drama"
+        episode:
+          $ref: "#/components/schemas/Episode"
+        progressSeconds:
+          type: integer
+        progressPercent:
+          type: number
+        updatedAt:
+          type: string
+      required: [drama, episode, progressSeconds, progressPercent, updatedAt]

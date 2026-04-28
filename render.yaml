@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: dramashort
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: |
+      corepack enable
+      pnpm install --frozen-lockfile
+      pnpm --filter @workspace/api-spec run codegen
+      pnpm --filter @workspace/db exec tsc -b
+      pnpm --filter @workspace/drama-app run build
+      pnpm --filter @workspace/api-server run build
+      pnpm --filter @workspace/db run push
+    startCommand: pnpm --filter @workspace/api-server run start
+    healthCheckPath: /api/healthz
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "10000"
+      - key: BASE_PATH
+        value: /
+      - key: STATIC_DIR
+        value: ./artifacts/drama-app/dist/public
+      - key: DATABASE_URL
+        sync: false
