@@ -1,4 +1,3 @@
-entryPoints: [
-  path.resolve(artifactDir, "src/index.ts"),
-  path.resolve(artifactDir, "src/serverless.ts"),
-],
+// @ts-nocheck
+import app from "../artifacts/api-server/dist/serverless.mjs";
+export default app;
