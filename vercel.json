@@ -1,10 +1,12 @@
 {
   "version": 2,
   "installCommand": "corepack enable && pnpm install --frozen-lockfile",
-  "buildCommand": "pnpm --filter @workspace/api-spec run codegen && pnpm --filter @workspace/db exec tsc -b && pnpm --filter @workspace/drama-app run build",
+  "buildCommand": "pnpm --filter @workspace/api-spec run codegen && pnpm --filter @workspace/db exec tsc -b && pnpm --filter @workspace/api-server run build && pnpm --filter @workspace/drama-app run build",
   "outputDirectory": "artifacts/drama-app/dist/public",
   "functions": {
-    "api/index.ts": { "maxDuration": 30 }
+    "api/index.ts": {
+      "includeFiles": "artifacts/api-server/dist/**"
+    }
   },
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/index" }
