@@ -1,3 +1,5 @@
-// @ts-nocheck
-import app from "../artifacts/api-server/dist/serverless.mjs";
-export default app;
+{
+  "name": "api",
+  "version": "1.0.0",
+  "type": "module"
+}
