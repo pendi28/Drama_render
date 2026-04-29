@@ -1,2 +1,4 @@
-import app from "../artifacts/api-server/src/app";
-export default app;
+entryPoints: [
+  path.resolve(artifactDir, "src/index.ts"),
+  path.resolve(artifactDir, "src/serverless.ts"),
+],
